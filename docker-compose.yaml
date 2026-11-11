@@ -1,0 +1,32 @@
+name: gestao_plano_de_voo
+
+services:
+  nameserver:
+    build: ./nameserver
+    image: trabalhofinal/nameserver:v1
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [gestao-network]
+
+  gateway:
+    build: ./gateway
+    image: trabalhofinal/gateway:v1
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://localhost:8765/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [ gestao-network ]
+
+networks:
+  gestao-network:
+    driver: bridge
