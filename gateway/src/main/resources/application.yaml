@@ -28,6 +28,12 @@ spring:
                 - Path=/gestao/**
               filters:
                 - RewritePath=/gestao/?(?<rest>.*), /api/$\{rest}
+            - id: malha-aerea
+              uri: lb://malha-aerea
+              predicates:
+                - Path=/malha/**
+              filters:
+                - RewritePath=/malha/?(?<rest>.*), /api/$\{rest}
 eureka:
   client:
     serviceUrl:
