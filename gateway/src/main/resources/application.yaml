@@ -34,6 +34,12 @@ spring:
                 - Path=/malha/**
               filters:
                 - RewritePath=/malha/?(?<rest>.*), /api/$\{rest}
+            - id: registro-aprovacoes
+              uri: lb://registro-aprovacoes
+              predicates:
+                - Path=/aprovacoes/**
+              filters:
+                - RewritePath=/aprovacoes/?(?<rest>.*), /api/$\{rest}
 eureka:
   client:
     serviceUrl:

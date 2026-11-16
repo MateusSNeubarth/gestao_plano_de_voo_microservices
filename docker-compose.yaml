@@ -7,8 +7,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${MALHA_DB_NAME:-malha_aerea}
-    # volumes:
-    #   - postgres-data:/var/lib/postgresql/data
+    volumes:
+      # scripts executados apenas na primeira inicialização (cria bancos adicionais)
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
       interval: 5s
@@ -21,6 +23,8 @@ services:
     image: trabalhofinal/nameserver:v1
     environment:
       SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8761:8761"
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://localhost:8761/actuator/health"]
       interval: 10s
@@ -66,6 +70,49 @@ services:
         condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://localhost:8081/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [ gestao-network ]
+
+  rabbitmq:
+    image: rabbitmq:4.1-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks: [ gestao-network ]
+
+  registroaprovacoes:
+    build: ./registroaprovacoes
+    image: trabalhofinal/registroaprovacoes:v1
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_URL: http://nameserver:8761/eureka/
+      SERVICE_HOSTNAME: registroaprovacoes
+      DB_URL: jdbc:postgresql://postgres:5432/registro_aprovacoes
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+    depends_on:
+      nameserver:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://localhost:8082/actuator/health" ]
       interval: 10s
       timeout: 5s
       retries: 12
