@@ -428,6 +428,6 @@ Após a aprovação, a altitude 30.000 da R1 e a vaga 2 de FLN deixam de aparece
 
 ## Documentação do projeto
 
-- [Casos de uso](docs/dominio/use_cases.md)
-- [Diagrama de domínio](docs/dominio/diagrama_de_dominio.png)
-- Diagramas C4: [contexto](docs/arquitetura/c4/DiagramaContexto.png), [containers](docs/arquitetura/c4/DiagramaContainer.png) e [componentes](docs/arquitetura/c4/DiagramaComponentes.png)
+- [Casos de uso](../docs/dominio/use_cases.md)
+- [Diagrama de domínio](../docs/dominio/diagrama_de_dominio.png)
+- Diagramas C4: [contexto](../docs/arquitetura/c4/DiagramaContexto.png), [containers](../docs/arquitetura/c4/DiagramaContainer.png) e [componentes](../docs/arquitetura/c4/DiagramaComponentes.png)
