@@ -4,15 +4,15 @@ services:
   postgres:
     image: postgres:17.6
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${MALHA_DB_NAME:-malha_aerea}
+      # superusuário só do container; cada serviço usa o próprio usuário (postgres/init)
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
-      # scripts executados apenas na primeira inicialização (cria bancos adicionais)
+      # rodam só com volume vazio: após mudar, `docker compose down -v`
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER}" ]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -60,9 +60,9 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       EUREKA_URL: http://nameserver:8761/eureka/
       SERVICE_HOSTNAME: malhaaerea
-      DB_URL: jdbc:postgresql://postgres:5432/${MALHA_DB_NAME:-malha_aerea}
-      DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_URL: jdbc:postgresql://postgres:5432/malha_aerea
+      DB_USERNAME: malha_aerea
+      DB_PASSWORD: malha_aerea
     depends_on:
       nameserver:
         condition: service_healthy
@@ -76,11 +76,34 @@ services:
       start_period: 30s
     networks: [ gestao-network ]
 
+  gestao:
+    build: ./gestao_plano_de_voo
+    image: trabalhofinal/gestao:v1
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_URL: http://nameserver:8761/eureka/
+      SERVICE_HOSTNAME: gestao
+      DB_URL: jdbc:postgresql://postgres:5432/gestao_planos
+      DB_USERNAME: gestao_planos
+      DB_PASSWORD: gestao_planos
+    depends_on:
+      nameserver:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "--silent", "--max-time", "3", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [ gestao-network ]
+
   rabbitmq:
     image: rabbitmq:4.1-management
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     ports:
       - "15672:15672"
     healthcheck:
@@ -99,11 +122,11 @@ services:
       EUREKA_URL: http://nameserver:8761/eureka/
       SERVICE_HOSTNAME: registroaprovacoes
       DB_URL: jdbc:postgresql://postgres:5432/registro_aprovacoes
-      DB_USERNAME: ${POSTGRES_USER:-postgres}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_USERNAME: registro_aprovacoes
+      DB_PASSWORD: registro_aprovacoes
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_USERNAME: ${RABBITMQ_USER:-guest}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      RABBITMQ_USERNAME: guest
+      RABBITMQ_PASSWORD: guest
     depends_on:
       nameserver:
         condition: service_healthy
