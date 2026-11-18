@@ -7,8 +7,6 @@ import com.projarc.trabalhofinal.adapter.out.persistence.entity.plano.PlanoDeVoo
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.plano.TrechoEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.mapper.PlanoPersistenceMapper;
 import com.projarc.trabalhofinal.adapter.out.persistence.repository.AeronaveJpaRepository;
-import com.projarc.trabalhofinal.adapter.out.persistence.repository.AeroportoJpaRepository;
-import com.projarc.trabalhofinal.adapter.out.persistence.repository.AeroviaJpaRepository;
 import com.projarc.trabalhofinal.adapter.out.persistence.repository.PilotoJpaRepository;
 import com.projarc.trabalhofinal.adapter.out.persistence.repository.PlanoDeVooJpaRepository;
 import com.projarc.trabalhofinal.application.port.out.plano.PlanoDeVooPort;
