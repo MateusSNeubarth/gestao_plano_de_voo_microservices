@@ -2,8 +2,6 @@ package com.projarc.trabalhofinal.adapter.out.persistence.adapter.reserva;
 
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.reserva.ReservaEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.mapper.ReservaPersistenceMapper;
-import com.projarc.trabalhofinal.adapter.out.persistence.repository.AeroportoJpaRepository;
-import com.projarc.trabalhofinal.adapter.out.persistence.repository.AeroviaJpaRepository;
 import com.projarc.trabalhofinal.adapter.out.persistence.repository.PlanoDeVooJpaRepository;
 import com.projarc.trabalhofinal.adapter.out.persistence.repository.ReservaJpaRepository;
 import com.projarc.trabalhofinal.application.port.out.reserva.ReservaPort;
