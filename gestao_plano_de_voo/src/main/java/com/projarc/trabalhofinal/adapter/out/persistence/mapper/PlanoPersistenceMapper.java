@@ -2,6 +2,8 @@ package com.projarc.trabalhofinal.adapter.out.persistence.mapper;
 
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.plano.PlanoDeVooEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.plano.TrechoEntity;
+import com.projarc.trabalhofinal.domain.model.malha.Aeroporto;
+import com.projarc.trabalhofinal.domain.model.malha.Aerovia;
 import com.projarc.trabalhofinal.domain.model.plano.Percurso;
 import com.projarc.trabalhofinal.domain.model.plano.PlanoDeVoo;
 import com.projarc.trabalhofinal.domain.model.plano.Trecho;
@@ -19,8 +21,8 @@ public final class PlanoPersistenceMapper {
                 .dataHoraPartida(planoDeVoo.getDataHoraPartida())
                 .aeronave(AeronavePersistenceMapper.toEntity(planoDeVoo.getAeronave()))
                 .piloto(PilotoPersistenceMapper.toEntity(planoDeVoo.getPiloto()))
-                .origem(MalhaPersistenceMapper.fromDomain(planoDeVoo.getOrigem()))
-                .destino(MalhaPersistenceMapper.fromDomain(planoDeVoo.getDestino()))
+                .codigoOrigem(planoDeVoo.getOrigem().getCodigo())
+                .codigoDestino(planoDeVoo.getDestino().getCodigo())
                 .trechos(trechosFromDomain(planoDeVoo.getPercurso().getTrechos()))
                 .build();
     }
@@ -32,8 +34,8 @@ public final class PlanoPersistenceMapper {
                 .dataHoraPartida(planoDeVooEntity.getDataHoraPartida())
                 .aeronave(AeronavePersistenceMapper.toDomain(planoDeVooEntity.getAeronave()))
                 .piloto(PilotoPersistenceMapper.toDomain(planoDeVooEntity.getPiloto()))
-                .origem(MalhaPersistenceMapper.toDomain(planoDeVooEntity.getOrigem()))
-                .destino(MalhaPersistenceMapper.toDomain(planoDeVooEntity.getDestino()))
+                .origem(Aeroporto.builder().codigo(planoDeVooEntity.getCodigoOrigem()).build())
+                .destino(Aeroporto.builder().codigo(planoDeVooEntity.getCodigoDestino()).build())
                 .percurso(Percurso.builder()
                         .trechos(new ArrayList<>(planoDeVooEntity.getTrechos().stream()
                                 .map(PlanoPersistenceMapper::toDomain)
@@ -53,7 +55,7 @@ public final class PlanoPersistenceMapper {
 
     public static TrechoEntity fromDomain(Trecho trecho) {
         return TrechoEntity.builder()
-                .aerovia(MalhaPersistenceMapper.fromDomain(trecho.getAerovia()))
+                .aeroviaId(trecho.getAerovia().getId())
                 .altitude(trecho.getAltitude())
                 .horarioEntradaNaAerovia(trecho.getHorarioEntradaNaAerovia())
                 .acaoNaChegada(trecho.getAcaoNaChegada())
@@ -64,7 +66,8 @@ public final class PlanoPersistenceMapper {
 
     public static Trecho toDomain(TrechoEntity trechoEntity) {
         return Trecho.builder()
-                .aerovia(MalhaPersistenceMapper.toDomain(trechoEntity.getAerovia()))
+                // só o id: o PlanoDeVooJpaAdapter completa a aerovia pela RedeAereaPort
+                .aerovia(Aerovia.builder().id(trechoEntity.getAeroviaId()).build())
                 .altitude(trechoEntity.getAltitude())
                 .horarioEntradaNaAerovia(trechoEntity.getHorarioEntradaNaAerovia())
                 .acaoNaChegada(trechoEntity.getAcaoNaChegada())

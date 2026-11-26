@@ -2,7 +2,6 @@
 package com.projarc.trabalhofinal.adapter.out.persistence.entity.plano;
 
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.aeronave.AeronaveEntity;
-import com.projarc.trabalhofinal.adapter.out.persistence.entity.malha.AeroportoEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.reserva.ReservaEntity;
 import com.projarc.trabalhofinal.domain.model.plano.Status;
 import jakarta.persistence.CascadeType;
@@ -54,13 +53,11 @@ public class PlanoDeVooEntity {
     @JoinColumn(name = "piloto_id")
     private PilotoEntity piloto;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "codigo_origem")
-    private AeroportoEntity origem;
+    @Column(nullable = false, name = "codigo_origem")
+    private String codigoOrigem;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "codigo_destino")
-    private AeroportoEntity destino;
+    @Column(nullable = false, name = "codigo_destino")
+    private String codigoDestino;
 
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

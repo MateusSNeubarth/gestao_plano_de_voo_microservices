@@ -13,11 +13,11 @@ import java.util.List;
 
 public interface ReservaJpaRepository extends JpaRepository<ReservaEntity, Integer> {
 
-    @Query("select r from ReservaAeroviaEntity r where r.aerovia.id = :aeroviaId and r.slot in :slots")
+    @Query("select r from ReservaAeroviaEntity r where r.aeroviaId = :aeroviaId and r.slot in :slots")
     List<ReservaAeroviaEntity> findReservasDeAerovia(@Param("aeroviaId") String aeroviaId,
                                                      @Param("slots") Collection<LocalDateTime> slots);
 
-    @Query("select r from ReservaEstacionamentoEntity r where r.aeroporto.codigo = :codigoAeroporto and r.slot in :slots")
+    @Query("select r from ReservaEstacionamentoEntity r where r.codigoAeroporto = :codigoAeroporto and r.slot in :slots")
     List<ReservaEstacionamentoEntity> findReservasDeEstacionamento(@Param("codigoAeroporto") String codigoAeroporto,
                                                                    @Param("slots") Collection<LocalDateTime> slots);
 }

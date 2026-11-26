@@ -3,8 +3,6 @@ package com.projarc.trabalhofinal.adapter.in.rest.controller.reserva;
 import com.projarc.trabalhofinal.adapter.in.rest.dto.reserva.response.AltitudesDisponiveisResponse;
 import com.projarc.trabalhofinal.adapter.in.rest.dto.reserva.response.VagasDisponiveisResponse;
 import com.projarc.trabalhofinal.adapter.in.rest.mapper.ReservaRestMapper;
-import com.projarc.trabalhofinal.application.port.in.malha.AeroportoInPort;
-import com.projarc.trabalhofinal.application.port.in.malha.AeroviaInPort;
 import com.projarc.trabalhofinal.application.port.in.reserva.DisponibilidadeInPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,8 +21,6 @@ import java.time.LocalDateTime;
 public class DisponibilidadeController {
 
     private final DisponibilidadeInPort disponibilidadeInPort;
-    private final AeroviaInPort aeroviaInPort;
-    private final AeroportoInPort aeroportoInPort;
 
     @GetMapping("/aerovias/{id}/altitudes-disponiveis")
     public ResponseEntity<AltitudesDisponiveisResponse> getAltitudesDisponiveis(
@@ -34,12 +30,8 @@ public class DisponibilidadeController {
         if (!inicio.isBefore(fim)) {
             return ResponseEntity.badRequest().build();
         }
-        var aerovia = aeroviaInPort.getAerovia(id);
-        if (aerovia == null) {
-            return ResponseEntity.notFound().build();
-        }
-        var altitudes = disponibilidadeInPort.getAltitudesDisponiveis(aerovia, inicio, fim);
-        return ResponseEntity.ok(ReservaRestMapper.toAltitudesDisponiveis(aerovia, inicio, fim, altitudes));
+        return ResponseEntity.of(disponibilidadeInPort.getAltitudesDisponiveis(id, inicio, fim)
+                .map(altitudes -> ReservaRestMapper.toAltitudesDisponiveis(id, inicio, fim, altitudes)));
     }
 
     @GetMapping("/aeroportos/{codigo}/vagas-disponiveis")
@@ -50,11 +42,7 @@ public class DisponibilidadeController {
         if (!inicio.isBefore(fim)) {
             return ResponseEntity.badRequest().build();
         }
-        var aeroporto = aeroportoInPort.getAeroporto(codigo);
-        if (aeroporto == null) {
-            return ResponseEntity.notFound().build();
-        }
-        var vagas = disponibilidadeInPort.getVagasDisponiveis(aeroporto, inicio, fim);
-        return ResponseEntity.ok(ReservaRestMapper.toVagasDisponiveis(aeroporto, inicio, fim, vagas));
+        return ResponseEntity.of(disponibilidadeInPort.getVagasDisponiveis(codigo, inicio, fim)
+                .map(vagas -> ReservaRestMapper.toVagasDisponiveis(codigo, inicio, fim, vagas)));
     }
 }
