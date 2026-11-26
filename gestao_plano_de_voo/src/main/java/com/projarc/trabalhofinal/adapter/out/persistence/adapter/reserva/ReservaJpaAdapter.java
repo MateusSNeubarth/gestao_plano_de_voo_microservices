@@ -22,8 +22,6 @@ public class ReservaJpaAdapter implements ReservaPort {
 
     private final ReservaJpaRepository reservaJpaRepository;
     private final PlanoDeVooJpaRepository planoDeVooJpaRepository;
-    private final AeroviaJpaRepository aeroviaJpaRepository;
-    private final AeroportoJpaRepository aeroportoJpaRepository;
 
     @Override
     public List<ReservaAerovia> getReservasDeAerovia(String aeroviaId, Collection<LocalDateTime> slots) {
@@ -63,10 +61,8 @@ public class ReservaJpaAdapter implements ReservaPort {
 
     private ReservaEntity fromDomain(Reserva reserva) {
         return switch (reserva) {
-            case ReservaAerovia reservaAerovia -> ReservaPersistenceMapper.fromDomain(reservaAerovia,
-                    aeroviaJpaRepository.getReferenceById(reservaAerovia.getAerovia().getId()));
-            case ReservaEstacionamento reservaEstacionamento -> ReservaPersistenceMapper.fromDomain(reservaEstacionamento,
-                    aeroportoJpaRepository.getReferenceById(reservaEstacionamento.getAeroporto().getCodigo()));
+            case ReservaAerovia reservaAerovia -> ReservaPersistenceMapper.fromDomain(reservaAerovia);
+            case ReservaEstacionamento reservaEstacionamento -> ReservaPersistenceMapper.fromDomain(reservaEstacionamento);
             default -> throw new IllegalArgumentException("Tipo de reserva desconhecido: " + reserva.getClass().getSimpleName());
         };
     }

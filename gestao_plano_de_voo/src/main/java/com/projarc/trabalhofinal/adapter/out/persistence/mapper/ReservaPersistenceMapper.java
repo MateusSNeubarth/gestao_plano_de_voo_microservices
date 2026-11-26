@@ -1,10 +1,10 @@
 package com.projarc.trabalhofinal.adapter.out.persistence.mapper;
 
-import com.projarc.trabalhofinal.adapter.out.persistence.entity.malha.AeroportoEntity;
-import com.projarc.trabalhofinal.adapter.out.persistence.entity.malha.AeroviaEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.reserva.ReservaAeroviaEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.reserva.ReservaEntity;
 import com.projarc.trabalhofinal.adapter.out.persistence.entity.reserva.ReservaEstacionamentoEntity;
+import com.projarc.trabalhofinal.domain.model.malha.Aeroporto;
+import com.projarc.trabalhofinal.domain.model.malha.Aerovia;
 import com.projarc.trabalhofinal.domain.model.reserva.Reserva;
 import com.projarc.trabalhofinal.domain.model.reserva.ReservaAerovia;
 import com.projarc.trabalhofinal.domain.model.reserva.ReservaEstacionamento;
@@ -25,7 +25,7 @@ public final class ReservaPersistenceMapper {
         return ReservaAerovia.builder()
                 .id(reservaEntity.getId())
                 .slot(reservaEntity.getSlot())
-                .aerovia(MalhaPersistenceMapper.toDomain(reservaEntity.getAerovia()))
+                .aerovia(Aerovia.builder().id(reservaEntity.getAeroviaId()).build())
                 .altitude(reservaEntity.getAltitude())
                 .build();
     }
@@ -34,23 +34,23 @@ public final class ReservaPersistenceMapper {
         return ReservaEstacionamento.builder()
                 .id(reservaEntity.getId())
                 .slot(reservaEntity.getSlot())
-                .aeroporto(MalhaPersistenceMapper.toDomain(reservaEntity.getAeroporto()))
+                .aeroporto(Aeroporto.builder().codigo(reservaEntity.getCodigoAeroporto()).build())
                 .numeroVaga(reservaEntity.getNumeroVaga())
                 .build();
     }
 
-    public static ReservaAeroviaEntity fromDomain(ReservaAerovia reserva, AeroviaEntity aerovia) {
+    public static ReservaAeroviaEntity fromDomain(ReservaAerovia reserva) {
         return ReservaAeroviaEntity.builder()
                 .slot(reserva.getSlot())
-                .aerovia(aerovia)
+                .aeroviaId(reserva.getAerovia().getId())
                 .altitude(reserva.getAltitude())
                 .build();
     }
 
-    public static ReservaEstacionamentoEntity fromDomain(ReservaEstacionamento reserva, AeroportoEntity aeroporto) {
+    public static ReservaEstacionamentoEntity fromDomain(ReservaEstacionamento reserva) {
         return ReservaEstacionamentoEntity.builder()
                 .slot(reserva.getSlot())
-                .aeroporto(aeroporto)
+                .codigoAeroporto(reserva.getAeroporto().getCodigo())
                 .numeroVaga(reserva.getNumeroVaga())
                 .build();
     }

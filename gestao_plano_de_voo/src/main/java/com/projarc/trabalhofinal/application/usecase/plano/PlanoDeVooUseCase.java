@@ -1,8 +1,7 @@
 package com.projarc.trabalhofinal.application.usecase.plano;
 
 import com.projarc.trabalhofinal.application.port.in.plano.PlanoDeVooInPort;
-import com.projarc.trabalhofinal.application.port.out.malha.AeroportoPort;
-import com.projarc.trabalhofinal.application.port.out.malha.AeroviaPort;
+import com.projarc.trabalhofinal.application.port.out.malha.RedeAereaPort;
 import com.projarc.trabalhofinal.application.port.out.plano.PlanoDeVooPort;
 import com.projarc.trabalhofinal.domain.exception.PlanoNaoEncontradoException;
 import com.projarc.trabalhofinal.domain.exception.TransicaoInvalidaException;
@@ -22,8 +21,7 @@ import java.util.List;
 public class PlanoDeVooUseCase implements PlanoDeVooInPort {
 
     private final PlanoDeVooPort planoDeVooPort;
-    private final AeroviaPort aeroviaPort;
-    private final AeroportoPort aeroportoPort;
+    private final RedeAereaPort redeAereaPort;
 
     @Override
     public PlanoDeVoo criarPlano(PlanoDeVoo plano) {
@@ -99,6 +97,12 @@ public class PlanoDeVooUseCase implements PlanoDeVooInPort {
                     "O código do aeroporto de destino não pode ser nulo ou vazio."
             );
         }
+        if (redeAereaPort.buscarAeroporto(plano.getOrigem().getCodigo()).isEmpty()) {
+            throw new IllegalArgumentException("Aeroporto de origem não encontrado");
+        }
+        if (redeAereaPort.buscarAeroporto(plano.getDestino().getCodigo()).isEmpty()) {
+            throw new IllegalArgumentException("Aeroporto de destino não encontrado");
+        }
 
         return planoDeVooPort.criarPlano(plano);
     }
@@ -165,14 +169,13 @@ public class PlanoDeVooUseCase implements PlanoDeVooInPort {
             );
         }
 
-        var aerovia = aeroviaPort.getAerovia(trecho.getAerovia().getId());
-        if (aerovia == null) {
-            throw new IllegalArgumentException("Aerovia não encontrada: " + trecho.getAerovia().getId());
-        }
+        var aerovia = redeAereaPort.buscarAerovia(trecho.getAerovia().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Aerovia não encontrada: " + trecho.getAerovia().getId()));
         trecho.setAerovia(aerovia);
 
         if (trecho.getNumeroVagaPretendida() != null) {
-            var destino = aeroportoPort.getAeroporto(aerovia.getCodDestino());
+            var destino = redeAereaPort.buscarAeroporto(aerovia.getCodDestino())
+                    .orElseThrow(() -> new IllegalArgumentException("Aeroporto não encontrado: " + aerovia.getCodDestino()));
             if (trecho.getNumeroVagaPretendida() < 1 || trecho.getNumeroVagaPretendida() > destino.getQtdVagas()) {
                 throw new IllegalArgumentException(
                         "A vaga " + trecho.getNumeroVagaPretendida()
