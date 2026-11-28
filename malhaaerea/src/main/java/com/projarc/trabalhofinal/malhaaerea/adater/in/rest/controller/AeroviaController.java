@@ -4,7 +4,10 @@ import com.projarc.trabalhofinal.malhaaerea.adater.in.rest.dto.request.AeroviaRe
 import com.projarc.trabalhofinal.malhaaerea.adater.in.rest.dto.response.AeroviaResponse;
 import com.projarc.trabalhofinal.malhaaerea.adater.in.rest.mapper.MalhaRestMapper;
 import com.projarc.trabalhofinal.malhaaerea.application.port.in.AeroviaInPort;
+import com.projarc.trabalhofinal.malhaaerea.domain.exception.ConflictException;
+import com.projarc.trabalhofinal.malhaaerea.domain.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,12 +30,22 @@ public class AeroviaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AeroviaResponse> getAerovia(@PathVariable String id) {
-        return ResponseEntity.ok(MalhaRestMapper.fromDomain(aeroviaInPort.getAerovia(id)));
+        try {
+            return ResponseEntity.ok(MalhaRestMapper.fromDomain(aeroviaInPort.getAerovia(id)));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
     public ResponseEntity<Void> createAerovia(@RequestBody AeroviaRequest request) {
-        aeroviaInPort.createAerovia(MalhaRestMapper.toDomain(request));
-        return ResponseEntity.created(URI.create("/api/aerovias/" + request.id())).build();
+        try {
+            aeroviaInPort.createAerovia(MalhaRestMapper.toDomain(request));
+            return ResponseEntity.created(URI.create("/api/aerovias/" + request.id())).build();
+        } catch (ConflictException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

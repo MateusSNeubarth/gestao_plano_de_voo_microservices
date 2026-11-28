@@ -1,6 +1,7 @@
 package com.projarc.trabalhofinal.adapter.out.persistence.adapter.plano;
 
 import com.projarc.trabalhofinal.application.port.out.AeronavesOutPort;
+import com.projarc.trabalhofinal.application.port.out.malha.RedeAereaPort;
 import com.projarc.trabalhofinal.application.port.out.plano.PlanoDeVooPort;
 import com.projarc.trabalhofinal.domain.model.malha.Aeroporto;
 import com.projarc.trabalhofinal.domain.model.malha.Aerovia;
@@ -15,12 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("local")
@@ -33,8 +37,13 @@ class PlanoDeVooJpaAdapterTest {
     @Autowired
     private AeronavesOutPort aeronavesOutPort;
 
+    @MockitoBean
+    private RedeAereaPort redeAereaPort;
+
     @Test
     void leituraCompletaAAeroviaPelaRedeAerea() {
+        when(redeAereaPort.buscarAerovia("R1")).thenReturn(Optional.of(
+                Aerovia.builder().id("R1").distanciaKm(363).codOrigem("POA").codDestino("FLN").build()));
         var partida = LocalDateTime.of(2030, 1, 1, 10, 0);
         var trecho = Trecho.builder()
                 .aerovia(Aerovia.builder().id("R1").build())

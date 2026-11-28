@@ -1,6 +1,6 @@
 # ADR 002: Propriedade dos dados da rede aérea na gestão
 
-**Status:** aceita
+**Status:** aceita. A implementação local (`RedeAereaJpaAdapter`) e as FKs foram substituídas pela [ADR 004](004-integracao-http-rede-aerea.md).
 
 ## Contexto
 

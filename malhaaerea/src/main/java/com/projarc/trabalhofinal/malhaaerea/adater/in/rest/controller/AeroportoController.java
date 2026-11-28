@@ -5,6 +5,7 @@ import com.projarc.trabalhofinal.malhaaerea.adater.in.rest.dto.response.Aeroport
 import com.projarc.trabalhofinal.malhaaerea.adater.in.rest.mapper.MalhaRestMapper;
 import com.projarc.trabalhofinal.malhaaerea.application.port.in.AeroportoInPort;
 import com.projarc.trabalhofinal.malhaaerea.domain.exception.ConflictException;
+import com.projarc.trabalhofinal.malhaaerea.domain.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,11 +32,11 @@ public class AeroportoController {
 
     @GetMapping("/{codigo}")
     public ResponseEntity<AeroportoResponse> getAeroporto(@PathVariable String codigo) {
-        var domain = aeronaves.getAeroporto(codigo);
-        if (domain == null) {
+        try {
+            return ResponseEntity.ok(MalhaRestMapper.fromDomain(aeronaves.getAeroporto(codigo)));
+        } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(MalhaRestMapper.fromDomain(domain));
     }
 
     @PostMapping
