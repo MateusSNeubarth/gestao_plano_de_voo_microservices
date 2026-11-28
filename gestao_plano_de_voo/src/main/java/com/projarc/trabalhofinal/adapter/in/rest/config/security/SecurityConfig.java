@@ -21,8 +21,6 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private static final String[] CADASTROS = {
-        "/api/aeroportos/**",
-        "/api/aerovias/**",
         "/api/pilotos/**",
         "/api/aeronaves/**"
     };

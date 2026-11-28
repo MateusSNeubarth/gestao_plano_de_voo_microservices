@@ -3,6 +3,8 @@ package com.projarc.trabalhofinal.malhaaerea.adater.out.persistence.adapter;
 import com.projarc.trabalhofinal.malhaaerea.adater.out.persistence.mapper.MalhaPersistenceMapper;
 import com.projarc.trabalhofinal.malhaaerea.adater.out.persistence.repository.AeroviaJpaRepository;
 import com.projarc.trabalhofinal.malhaaerea.application.port.out.AeroviaOutPort;
+import com.projarc.trabalhofinal.malhaaerea.domain.exception.ConflictException;
+import com.projarc.trabalhofinal.malhaaerea.domain.exception.ResourceNotFoundException;
 import com.projarc.trabalhofinal.malhaaerea.domain.model.Aerovia;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -24,11 +26,15 @@ public class AeroviaJpaAdapter implements AeroviaOutPort {
 
     @Override
     public Aerovia getAerovia(String id) {
-        return repository.findById(id).map(MalhaPersistenceMapper::toDomain).orElse(null);
+        return repository.findById(id).map(MalhaPersistenceMapper::toDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("Aerovia"));
     }
 
     @Override
     public void createAerovia(Aerovia aerovia) {
+        if (repository.existsById(aerovia.getId()))
+            throw new ConflictException("Aerovia já existe");
+
         repository.save(MalhaPersistenceMapper.fromDomain(aerovia));
     }
 }

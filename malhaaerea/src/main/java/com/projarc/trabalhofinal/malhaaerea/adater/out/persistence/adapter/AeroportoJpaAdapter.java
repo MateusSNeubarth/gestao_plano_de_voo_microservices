@@ -5,6 +5,7 @@ import com.projarc.trabalhofinal.malhaaerea.adater.out.persistence.mapper.MalhaP
 import com.projarc.trabalhofinal.malhaaerea.adater.out.persistence.repository.AeroportoJpaRepository;
 import com.projarc.trabalhofinal.malhaaerea.application.port.out.AeroportoOutPort;
 import com.projarc.trabalhofinal.malhaaerea.domain.exception.ConflictException;
+import com.projarc.trabalhofinal.malhaaerea.domain.exception.ResourceNotFoundException;
 import com.projarc.trabalhofinal.malhaaerea.domain.model.Aeroporto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -27,13 +28,14 @@ public class AeroportoJpaAdapter implements AeroportoOutPort {
 
     @Override
     public Aeroporto getAeroporto(String codigo) {
-        return aeroportoJpaRepository.findByCodigo(codigo).map(MalhaPersistenceMapper::toDomain).orElse(null);
+        return aeroportoJpaRepository.findByCodigo(codigo).map(MalhaPersistenceMapper::toDomain)
+                .orElseThrow(() -> new ResourceNotFoundException("Aeroporto"));
     }
 
     @Override
     public void createAeroporto(Aeroporto aeroporto) {
-        Optional<AeroportoEntity> exists = aeroportoJpaRepository.findByCodigo(aeroporto.getCodigo());
-        if (exists.isPresent()) throw new ConflictException("Aeroporto já existe");
+        if (aeroportoJpaRepository.existsByCodigo(aeroporto.getCodigo()))
+            throw new ConflictException("Aeroporto já existe");
 
         aeroportoJpaRepository.save(MalhaPersistenceMapper.fromDomain(aeroporto));
     }
