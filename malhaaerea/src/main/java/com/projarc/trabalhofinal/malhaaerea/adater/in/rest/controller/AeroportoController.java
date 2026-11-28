@@ -43,7 +43,7 @@ public class AeroportoController {
     public ResponseEntity<Void> postAeroporto(@RequestBody AeroportoRequest request) {
         try {
             this.aeronaves.createAeroporto(MalhaRestMapper.toDomain(request));
-            return ResponseEntity.created(URI.create("/aeroportos/" + request.codigo())).build();
+            return ResponseEntity.created(URI.create("/api/aeroportos/" + request.codigo())).build();
         } catch(ConflictException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         } catch (Exception e) {

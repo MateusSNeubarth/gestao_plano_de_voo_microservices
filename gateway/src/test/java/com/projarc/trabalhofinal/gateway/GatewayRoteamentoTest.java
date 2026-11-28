@@ -85,6 +85,13 @@ class GatewayRoteamentoTest {
     }
 
     @Test
+    void locationVoltaComPrefixoDoGateway() throws Exception {
+        var resposta = enviar("POST", "/gestao/criado", USUARIO);
+        assertThat(resposta.statusCode()).isEqualTo(201);
+        assertThat(resposta.headers().firstValue("Location")).hasValue("/gestao/planos/5");
+    }
+
+    @Test
     void respostaLentaDentroDoTimeoutNaoCaiNoFallback() throws Exception {
         // 1,5s: passaria do TimeLimiter padrão (1s) do Resilience4j
         assertThat(enviar("GET", "/gestao/lento", USUARIO).statusCode()).isEqualTo(200);
@@ -137,6 +144,10 @@ class GatewayRoteamentoTest {
                 case "/api/erro" -> {
                     troca.getResponseHeaders().add("Content-Type", "application/problem+json");
                     escrever(troca, 422, "{\"status\":422,\"detail\":\"regra\"}");
+                }
+                case "/api/criado" -> {
+                    troca.getResponseHeaders().add("Location", "/api/planos/5");
+                    escrever(troca, 201, "");
                 }
                 case "/api/lento" -> { Thread.sleep(1500); escrever(troca, 200, "ok"); }
                 case "/api/muito-lento" -> { Thread.sleep(3000); escrever(troca, 200, "tarde"); }

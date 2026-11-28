@@ -22,6 +22,7 @@ spring:
           # /<prefixo>/x → /api/x no serviço (ex.: /gestao/planos → /api/planos).
           # O CircuitBreaker só desvia para /fallback em falha de comunicação ou timeout;
           # respostas 4xx/5xx dos serviços passam sem alteração.
+          # RewriteResponseHeader: o Location dos 201 volta com o prefixo do gateway (/api/planos/5 → /gestao/planos/5).
           routes:
             # rotas de docs antes das genéricas: o springdoc serve /v3/api-docs, fora de /api
             - id: gestao-voo-docs
@@ -48,6 +49,7 @@ spring:
                 - Path=/gestao/**
               filters:
                 - RewritePath=/gestao/?(?<rest>.*), /api/$\{rest}
+                - RewriteResponseHeader=Location, ^/api/, /gestao/
                 - name: CircuitBreaker
                   args:
                     id: gestao-voo
@@ -58,6 +60,7 @@ spring:
                 - Path=/malha/**
               filters:
                 - RewritePath=/malha/?(?<rest>.*), /api/$\{rest}
+                - RewriteResponseHeader=Location, ^/api/, /malha/
                 - name: CircuitBreaker
                   args:
                     id: malha-aerea
@@ -68,6 +71,7 @@ spring:
                 - Path=/aprovacoes/**
               filters:
                 - RewritePath=/aprovacoes/?(?<rest>.*), /api/$\{rest}
+                - RewriteResponseHeader=Location, ^/api/, /aprovacoes/
                 - name: CircuitBreaker
                   args:
                     id: registro-aprovacoes
