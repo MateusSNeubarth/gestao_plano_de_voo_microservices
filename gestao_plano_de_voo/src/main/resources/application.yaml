@@ -22,8 +22,9 @@ eureka:
     serviceUrl:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
-    hostname: ${SERVICE_HOSTNAME:localhost}
-    instance-id: ${spring.application.name}:${server.port}
+    # IP e id aleatório: réplicas do mesmo serviço (docker compose --scale) aparecem como instâncias distintas no Eureka
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
 
 # chamadas ao malha-aerea: somadas por leitura de plano (uma por aerovia), precisam ficar abaixo do response-timeout de 5s do gateway
 malha:
@@ -36,12 +37,3 @@ management:
     web:
       exposure:
         include: health,info
-
-seguranca:
-  usuarios:
-    admin:
-      username: ${ADMIN_USERNAME:admin}
-      password: ${ADMIN_PASSWORD:admin123}
-    usuario:
-      username: ${USUARIO_USERNAME:usuario}
-      password: ${USUARIO_PASSWORD:usuario123}

@@ -41,7 +41,7 @@ Os valores ficam abaixo do `response-timeout: 5s` do gateway, para que a gestão
 
 ## Pontos em aberto
 
-- **Credencial técnica adiada.** O `malha-aerea` não tem segurança nesta versão, e a gestão o chama sem autenticação. A credencial técnica (`MALHA_USERNAME`/`MALHA_PASSWORD`) entra junto com a segurança no gateway.
+- **Sem credencial técnica.** Autenticação e autorização ficam só no gateway (E2-02); os serviços não têm Spring Security e ficam apenas na rede interna do compose, então a gestão chama o `malha-aerea` sem autenticação.
 - **Uma chamada por aerovia em cada leitura de plano.** Se a latência virar problema: buscar várias aerovias numa só chamada, ou fazer cache curto na gestão.
 - **Gateway com instância morta ainda registrada.** Enquanto o Eureka ainda lista o `malha-aerea` parado, o gateway responde 500 (`Connection refused`) em `/malha/**`; depois que a instância sai do registro, responde 503. Fica para o circuit breaker do gateway.
 - **Latência do Eureka.** Uma instância parada pode levar até cerca de 90s para sair do registro, e uma nova leva cerca de 30s para ser vista pelos clientes. Nesse intervalo, a gestão pode responder 503 com o `malha-aerea` já no ar.
