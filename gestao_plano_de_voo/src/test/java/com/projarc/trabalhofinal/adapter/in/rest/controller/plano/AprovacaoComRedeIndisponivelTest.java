@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,7 +68,7 @@ class AprovacaoComRedeIndisponivelTest {
         when(redeAereaPort.buscarAerovia(anyString())).thenThrow(falha);
         when(redeAereaPort.buscarAeroporto(anyString())).thenThrow(falha);
 
-        mockMvc.perform(post("/api/planos/{id}/aprovacao", id).with(httpBasic("admin", "admin123")))
+        mockMvc.perform(post("/api/planos/{id}/aprovacao", id))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON));
 

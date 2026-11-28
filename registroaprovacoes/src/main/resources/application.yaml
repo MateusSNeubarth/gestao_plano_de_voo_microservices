@@ -27,8 +27,9 @@ eureka:
     serviceUrl:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
   instance:
-    hostname: ${SERVICE_HOSTNAME:localhost}
-    instance-id: ${spring.application.name}:${server.port}
+    # IP e id aleatório: réplicas do mesmo serviço (docker compose --scale) aparecem como instâncias distintas no Eureka
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.value}
 
 management:
   endpoints:

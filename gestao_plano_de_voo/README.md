@@ -17,7 +17,7 @@ O serviço expõe uma API REST para cadastrar a malha aérea (aeroportos e aerov
 ## Tecnologias
 
 - Java 25
-- Spring Boot 4.1 (Web MVC, Data JPA, Security)
+- Spring Boot 4.1 (Web MVC, Data JPA)
 - Flyway para as migrations do banco
 - PostgreSQL no ambiente de produção e H2 em memória no ambiente local
 - springdoc-openapi (Swagger UI)
@@ -121,7 +121,7 @@ As migrations carregam os seguintes registros, disponíveis em qualquer ambiente
 
 ## Autenticação
 
-Todos os endpoints da API exigem autenticação HTTP Basic. Há dois usuários, definidos em memória:
+A autenticação HTTP Basic e as permissões ficam no gateway (`localhost:8765`, prefixo `/gestao`); este serviço não tem Spring Security e recebe o usuário autenticado nos cabeçalhos `X-Usuario` e `X-Papel`. Há dois usuários, definidos em memória no gateway:
 
 | Usuário | Senha | Perfil | Permissões |
 | --- | --- | --- | --- |
@@ -133,7 +133,7 @@ Requisições sem credenciais respondem `401`, e requisições sem permissão re
 Exemplo:
 
 ```sh
-curl -u usuario:usuario123 http://localhost:8080/api/aeroportos
+curl -u usuario:usuario123 http://localhost:8765/malha/aeroportos
 ```
 
 ### Swagger UI

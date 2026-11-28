@@ -3,9 +3,13 @@ server:
 spring:
   application:
     name: gateway
-  webflux:
+  mvc:
     problemdetails:
       enabled: true
+  http:
+    clients:
+      connect-timeout: 1s
+      read-timeout: 5s
   cloud:
     loadbalancer:
       cache:
@@ -14,36 +18,81 @@ spring:
         enabled: false
     gateway:
       server:
-        webflux:
-          discovery:
-            locator:
-              enabled: false
-          httpclient:
-            connect-timeout: 1000
-            response-timeout: 5s
+        webmvc:
+          # /<prefixo>/x → /api/x no serviço (ex.: /gestao/planos → /api/planos).
+          # O CircuitBreaker só desvia para /fallback em falha de comunicação ou timeout;
+          # respostas 4xx/5xx dos serviços passam sem alteração.
+          # RewriteResponseHeader: o Location dos 201 volta com o prefixo do gateway (/api/planos/5 → /gestao/planos/5).
           routes:
+            # rotas de docs antes das genéricas: o springdoc serve /v3/api-docs, fora de /api
+            - id: gestao-voo-docs
+              uri: lb://gestao-voo
+              predicates:
+                - Path=/gestao/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: malha-aerea-docs
+              uri: lb://malha-aerea
+              predicates:
+                - Path=/malha/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+            - id: registro-aprovacoes-docs
+              uri: lb://registro-aprovacoes
+              predicates:
+                - Path=/aprovacoes/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
             - id: gestao-voo
               uri: lb://gestao-voo
               predicates:
                 - Path=/gestao/**
               filters:
                 - RewritePath=/gestao/?(?<rest>.*), /api/$\{rest}
+                - RewriteResponseHeader=Location, ^/api/, /gestao/
+                - name: CircuitBreaker
+                  args:
+                    id: gestao-voo
+                    fallbackUri: forward:/fallback/gestao-voo
             - id: malha-aerea
               uri: lb://malha-aerea
               predicates:
                 - Path=/malha/**
               filters:
                 - RewritePath=/malha/?(?<rest>.*), /api/$\{rest}
+                - RewriteResponseHeader=Location, ^/api/, /malha/
+                - name: CircuitBreaker
+                  args:
+                    id: malha-aerea
+                    fallbackUri: forward:/fallback/malha-aerea
             - id: registro-aprovacoes
               uri: lb://registro-aprovacoes
               predicates:
                 - Path=/aprovacoes/**
               filters:
                 - RewritePath=/aprovacoes/?(?<rest>.*), /api/$\{rest}
+                - RewriteResponseHeader=Location, ^/api/, /aprovacoes/
+                - name: CircuitBreaker
+                  args:
+                    id: registro-aprovacoes
+                    fallbackUri: forward:/fallback/registro-aprovacoes
+resilience4j:
+  # acima do read-timeout (5s): o timeout de leitura é do cliente HTTP (504), não do TimeLimiter (padrão 1s)
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
+  circuitbreaker:
+    configs:
+      default:
+        # padrão 60s: o serviço que volta precisa voltar a responder logo, sem reiniciar o gateway
+        wait-duration-in-open-state: 5s
 eureka:
   client:
     serviceUrl:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    # padrão 30s: instância nova ou que voltou é vista mais rápido
+    registry-fetch-interval-seconds: 5
   instance:
     hostname: ${SERVICE_HOSTNAME:localhost}
     instance-id: ${spring.application.name}:${server.port}
@@ -52,3 +101,11 @@ management:
     web:
       exposure:
         include: health,info
+seguranca:
+  usuarios:
+    admin:
+      username: ${ADMIN_USERNAME:admin}
+      password: ${ADMIN_PASSWORD:admin123}
+    usuario:
+      username: ${USUARIO_USERNAME:usuario}
+      password: ${USUARIO_PASSWORD:usuario123}

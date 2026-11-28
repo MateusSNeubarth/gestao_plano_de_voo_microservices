@@ -1,0 +1,79 @@
+### Etapa 2: tudo pelo gateway (localhost:8765). Subir com: docker compose up --build
+### /gestao/x → gestao-voo /api/x · /malha/x → malha-aerea /api/x · /aprovacoes/x → registro-aprovacoes /api/x
+@gateway = http://localhost:8765
+### Autenticação e autorização só no gateway; os serviços recebem X-Usuario e X-Papel, sem o Authorization
+@usuario = Basic dXN1YXJpbzp1c3VhcmlvMTIz
+@admin = Basic YWRtaW46YWRtaW4xMjM=
+
+### Listar planos (usuario) → 200
+GET {{gateway}}/gestao/planos
+Authorization: {{usuario}}
+
+### X-Usuario enviado pelo cliente é descartado: a gestão continua vendo "usuario"
+GET {{gateway}}/gestao/planos
+Authorization: {{usuario}}
+X-Usuario: admin
+X-Papel: ADMIN
+
+### Sem credencial → 401
+GET {{gateway}}/gestao/planos
+
+### Cadastro de aeronave com usuario comum → 403
+POST {{gateway}}/gestao/aeronaves
+Authorization: {{usuario}}
+Content-Type: application/json
+
+{"prefixo":"PR-DEM","categoria":"PARTICULAR","velocidadeDeCruzeiro":300,"autonomia":1200,"empresaResponsavelPelaManutencao":"Demo"}
+
+### Cadastro de aerovia com usuario comum → 403
+POST {{gateway}}/malha/aerovias
+Authorization: {{usuario}}
+Content-Type: application/json
+
+{"id":"R9","origem":"POA","destino":"GRU","distanciaKm":852}
+
+### O mesmo cadastro com admin → 201
+POST {{gateway}}/malha/aerovias
+Authorization: {{admin}}
+Content-Type: application/json
+
+{"id":"R9","origem":"POA","destino":"GRU","distanciaKm":852}
+
+### Plano inexistente → 404 em application/problem+json, igual ao que a gestão devolve
+GET {{gateway}}/gestao/planos/999999
+Authorization: {{usuario}}
+
+### Malha aérea pelo gateway → 200
+GET {{gateway}}/malha/aeroportos
+Authorization: {{usuario}}
+
+### Aerovias com filtro → 200
+GET {{gateway}}/malha/aerovias?origem=POA
+Authorization: {{usuario}}
+
+### OpenAPI de cada serviço, sem credencial (importar no Swagger Editor ou no Postman)
+GET {{gateway}}/gestao/v3/api-docs
+
+###
+GET {{gateway}}/malha/v3/api-docs
+
+###
+GET {{gateway}}/aprovacoes/v3/api-docs
+
+### ---------------------------------------------------------------------------
+### Destino indisponível
+###   docker compose stop gestao
+###   → a chamada abaixo responde 503 application/problem+json com "servico": "gestao-voo"
+###   docker compose start gestao
+###   → depois de ~10 s (registro no Eureka + busca do gateway a cada 5 s) volta a responder 200,
+###     sem reiniciar o gateway
+### Destino lento (mais de 5 s) → 504 application/problem+json
+GET {{gateway}}/gestao/planos
+Authorization: {{usuario}}
+
+### ---------------------------------------------------------------------------
+### Duas instâncias da gestão
+###   docker compose up -d --scale gestao=2
+###   → o painel do Eureka (http://localhost:8761) mostra GESTAO-VOO com 2 instâncias
+###   docker compose logs -f gestao
+###   → repetir a chamada acima: as requisições se alternam entre gestao-1 e gestao-2

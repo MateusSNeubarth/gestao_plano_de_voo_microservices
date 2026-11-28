@@ -59,7 +59,6 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       EUREKA_URL: http://nameserver:8761/eureka/
-      SERVICE_HOSTNAME: malhaaerea
       DB_URL: jdbc:postgresql://postgres:5432/malha_aerea
       DB_USERNAME: malha_aerea
       DB_PASSWORD: malha_aerea
@@ -82,10 +81,11 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       EUREKA_URL: http://nameserver:8761/eureka/
-      SERVICE_HOSTNAME: gestao
       DB_URL: jdbc:postgresql://postgres:5432/gestao_planos
       DB_USERNAME: gestao_planos
       DB_PASSWORD: gestao_planos
+      # uma linha por requisição: mostra a alternância entre réplicas (docker compose up --scale gestao=2)
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB_SERVLET_DISPATCHERSERVLET: DEBUG
     depends_on:
       nameserver:
         condition: service_healthy
@@ -120,7 +120,6 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       EUREKA_URL: http://nameserver:8761/eureka/
-      SERVICE_HOSTNAME: registroaprovacoes
       DB_URL: jdbc:postgresql://postgres:5432/registro_aprovacoes
       DB_USERNAME: registro_aprovacoes
       DB_PASSWORD: registro_aprovacoes
